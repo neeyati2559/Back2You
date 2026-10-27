@@ -1,19 +1,133 @@
 package back2you;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
+import java.util.Scanner;
 
 public class Main {
+    private static Scanner sc = new Scanner(System.in);
+    private static ItemManager manager = new ItemManager();
+
     public static void main(String[] args) {
-        Item lost = new LostItem(1, "Black Wallet", "Leather wallet with college ID inside",
-                Category.ACCESSORIES, "Library", LocalDate.of(2026, 10, 25),
-                "Neeyati", "9876543210");
+        int choice;
+        do {
+            System.out.println("\n===== Back2You: Campus Lost & Found =====");
+            System.out.println("1. Report a LOST item");
+            System.out.println("2. Report a FOUND item");
+            System.out.println("3. View all items");
+            System.out.println("4. Search items");
+            System.out.println("5. Exit");
+            System.out.print("Enter choice: ");
 
-        Item found = new FoundItem(2, "Wallet", "Black leather wallet found near shelves",
-                Category.ACCESSORIES, "Library", LocalDate.of(2026, 10, 26),
-                "Rahul", "9123456780");
+            try {
+                choice = Integer.parseInt(sc.nextLine());
+            } catch (NumberFormatException e) {
+                choice = 0;
+            }
 
-        lost.displayDetails();
-        System.out.println();
-        found.displayDetails();
+            switch (choice) {
+                case 1 -> reportLostItem();
+                case 2 -> reportFoundItem();
+                case 3 -> manager.viewAllItems();
+                case 4 -> searchItems();
+                case 5 -> System.out.println("Goodbye!");
+                default -> System.out.println("Invalid choice, try again.");
+            }
+        } while (choice != 5);
+    }
+
+    private static void reportLostItem() {
+        System.out.println("\n--- Report a Lost Item ---");
+        System.out.print("Item name: ");
+        String name = sc.nextLine();
+        System.out.print("Description: ");
+        String description = sc.nextLine();
+        Category category = readCategory();
+        System.out.print("Where did you lose it? ");
+        String location = sc.nextLine();
+        LocalDate date = readDate();
+        System.out.print("Your name: ");
+        String ownerName = sc.nextLine();
+        System.out.print("Your contact (phone/email): ");
+        String contact = sc.nextLine();
+
+        LostItem item = new LostItem(manager.generateId(), name, description,
+                category, location, date, ownerName, contact);
+        manager.addItem(item);
+    }
+
+    private static void reportFoundItem() {
+        System.out.println("\n--- Report a Found Item ---");
+        System.out.print("Item name: ");
+        String name = sc.nextLine();
+        System.out.print("Description: ");
+        String description = sc.nextLine();
+        Category category = readCategory();
+        System.out.print("Where did you find it? ");
+        String location = sc.nextLine();
+        LocalDate date = readDate();
+        System.out.print("Your name: ");
+        String finderName = sc.nextLine();
+        System.out.print("Your contact (phone/email): ");
+        String contact = sc.nextLine();
+
+        FoundItem item = new FoundItem(manager.generateId(), name, description,
+                category, location, date, finderName, contact);
+        manager.addItem(item);
+    }
+
+    private static Category readCategory() {
+        Category[] categories = Category.values();
+        System.out.println("Choose a category:");
+        for (int i = 0; i < categories.length; i++) {
+            System.out.println((i + 1) + ". " + categories[i]);
+        }
+        while (true) {
+            System.out.print("Category number: ");
+            try {
+                int num = Integer.parseInt(sc.nextLine());
+                if (num >= 1 && num <= categories.length) {
+                    return categories[num - 1];
+                }
+            } catch (NumberFormatException e) {
+                // fall through to the message below
+            }
+            System.out.println("Invalid number, try again.");
+        }
+    }
+
+    private static LocalDate readDate() {
+        while (true) {
+            System.out.print("Date (yyyy-mm-dd, e.g. 2026-10-25): ");
+            try {
+                return LocalDate.parse(sc.nextLine());
+            } catch (DateTimeParseException e) {
+                System.out.println("Invalid date format, try again.");
+            }
+        }
+    }
+    private static void searchItems() {
+        System.out.println("\n--- Search Items ---");
+        System.out.println("1. By category");
+        System.out.println("2. By location");
+        System.out.println("3. By keyword (name or description)");
+        System.out.print("Enter choice: ");
+
+        String input = sc.nextLine();
+        switch (input) {
+            case "1" -> {
+                Category category = readCategory();
+                manager.displayResults(manager.searchByCategory(category));
+            }
+            case "2" -> {
+                System.out.print("Enter location: ");
+                manager.displayResults(manager.searchByLocation(sc.nextLine()));
+            }
+            case "3" -> {
+                System.out.print("Enter keyword: ");
+                manager.displayResults(manager.searchByKeyword(sc.nextLine()));
+            }
+            default -> System.out.println("Invalid choice.");
+        }
     }
 }
