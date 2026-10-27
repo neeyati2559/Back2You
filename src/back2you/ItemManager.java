@@ -13,6 +13,7 @@ public class ItemManager {
 
     public void addItem(Item item) {
         items.add(item);
+        FileHandler.saveItems(items);
         System.out.println(item.getType() + " item added with ID " + item.getId());
     }
 
@@ -53,6 +54,7 @@ public class ItemManager {
         Item item = findById(id);
         if (item != null) {
             items.remove(item);
+            FileHandler.saveItems(items);
             return true;
         }
         return false;
@@ -135,5 +137,15 @@ public class ItemManager {
             item.displayDetails();
             System.out.println("-------------------------");
         }
+    }
+    public void loadItems(ArrayList<Item> loaded) {
+        items = loaded;
+        int maxId = 0;
+        for (Item item : items) {
+            if (item.getId() > maxId) {
+                maxId = item.getId();
+            }
+        }
+        nextId = maxId + 1;
     }
 }

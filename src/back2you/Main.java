@@ -1,3 +1,4 @@
+
 package back2you;
 
 import java.time.LocalDate;
@@ -11,6 +12,8 @@ public class Main {
     private static MatchingEngine engine = new MatchingEngine();
 
     public static void main(String[] args) {
+        manager.loadItems(FileHandler.loadItems());
+        System.out.println("Welcome to Back2You! Loaded " + manager.getAllItems().size() + " saved item(s).");
         int choice;
         do {
             System.out.println("\n===== Back2You: Campus Lost & Found =====");
