@@ -3,10 +3,12 @@ package back2you;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.Scanner;
+import java.util.ArrayList;
 
 public class Main {
     private static Scanner sc = new Scanner(System.in);
     private static ItemManager manager = new ItemManager();
+    private static MatchingEngine engine = new MatchingEngine();
 
     public static void main(String[] args) {
         int choice;
@@ -16,7 +18,8 @@ public class Main {
             System.out.println("2. Report a FOUND item");
             System.out.println("3. View all items");
             System.out.println("4. Search items");
-            System.out.println("5. Exit");
+            System.out.println("5. Find matches for my lost item");
+            System.out.println("6. Exit");
             System.out.print("Enter choice: ");
 
             try {
@@ -25,15 +28,17 @@ public class Main {
                 choice = 0;
             }
 
+
             switch (choice) {
                 case 1 -> reportLostItem();
                 case 2 -> reportFoundItem();
                 case 3 -> manager.viewAllItems();
                 case 4 -> searchItems();
-                case 5 -> System.out.println("Goodbye!");
+                case 5 -> findMatches();
+                case 6 -> System.out.println("Goodbye!");
                 default -> System.out.println("Invalid choice, try again.");
             }
-        } while (choice != 5);
+        } while (choice != 6);
     }
 
     private static void reportLostItem() {
@@ -130,4 +135,35 @@ public class Main {
             default -> System.out.println("Invalid choice.");
         }
     }
+        private static void findMatches() {
+            System.out.print("\nEnter the ID of your lost item: ");
+            int id;
+            try {
+                id = Integer.parseInt(sc.nextLine());
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid ID.");
+                return;
+            }
+
+            Item item = manager.findById(id);
+            if (!(item instanceof LostItem)) {
+                System.out.println("No lost item found with that ID.");
+                return;
+            }
+
+            LostItem lost = (LostItem) item;
+            ArrayList<MatchResult> matches = engine.findMatches(lost, manager.getFoundItems());
+
+            if (matches.isEmpty()) {
+                System.out.println("No possible matches yet. Check back later!");
+                return;
+            }
+
+            System.out.println("\nPossible matches for your " + lost.getName() + ":\n");
+            for (MatchResult match : matches) {
+                match.display();
+                System.out.println("-------------------------");
+            }
+            System.out.println("Contact the finder using the details above to claim your item.");
+        }
 }
